@@ -25,23 +25,54 @@ homicide = read_csv("data/homicide-data.csv") %>%
   janitor::clean_names()
 ```
 
-Create a city_state variable 
+Create a city_state variable and a binary variable 
 
 ```{r}
 homicide = 
   homicide %>% 
-  mutate(city_state = str_c(city, state, sep = "_")) 
+  mutate(city_state = str_c(city, state, sep = "_"),  
+         resolved = as.numeric(disposition == "Closed by arrest"))
 ```
 
-Create a binary variable 
+Omit city Dallas, TX; Phoenix, AZ; and Kansas City, MO and Tulsa, AL
+
+```{r}
+homicide = 
+  homicide %>% 
+  filter(!(city_state == "Dallas_TX" | city_state == "Phoenix_AZ" | city_state == "Kansas City_MO" | city_state == "Tulsa_AL"))
+```
+
+Modifiy victim_race, and make victim_age numeric
 
 ```{r}
 homicide = 
   homicide %>%
-  nest() %>%
-  mutate(unsolved = map(.x = data, ~.x %>% 
-                        filter(disposition %in% c("Closed without arrest","Open/No arrest")))) %>% 
-  unnest() 
+  mutate(victim_age = as.numeric(victim_age),
+         victim_race = fct_relevel(victim_race, "White"))
 ```
 
+fit a logistic regression
+
+```{r}
+baltimore_df = 
+  homicide %>% 
+  filter(city == "Baltimore")
+```
+
+```{r}
+fit_logistic = 
+  baltimore_df %>% 
+  glm(resolved ~ victim_age + victim_race + victim_sex, data = ., family = binomial())
+```
+
+```{r}
+fit_logistic %>% 
+  broom::tidy()
+```
+
+obtain the estimate and confidence interval of the adjusted odds ratio
+
+```{r}
+
+```
 
