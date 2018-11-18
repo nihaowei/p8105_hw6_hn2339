@@ -9,3 +9,39 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(stringr)
+library(readr)
+```
+
+## Question 1
+
+```{r}
+library(readr)
+homicide = read_csv("data/homicide-data.csv") %>% 
+  janitor::clean_names()
+```
+
+Create a city_state variable 
+
+```{r}
+homicide = 
+  homicide %>% 
+  mutate(city_state = str_c(city, state, sep = "_")) 
+```
+
+Create a binary variable 
+
+```{r}
+homicide = 
+  homicide %>%
+  nest() %>%
+  mutate(unsolved = map(.x = data, ~.x %>% 
+                        filter(disposition %in% c("Closed without arrest","Open/No arrest")))) %>% 
+  unnest() 
+```
+
+
