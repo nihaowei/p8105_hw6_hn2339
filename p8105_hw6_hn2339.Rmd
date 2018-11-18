@@ -1,0 +1,11 @@
+---
+title: "p8105_hw6_hn2339"
+author: "Haowei Ni"
+date: "2018/11/18"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
