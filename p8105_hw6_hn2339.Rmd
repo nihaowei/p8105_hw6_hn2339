@@ -78,5 +78,36 @@ fit_logistic %>%
   knitr::kable(digits = 3)
 ```
 
+the odds ratio estimate is 0.441 and 95% CI is (0.313, 0.620)
 
+```{r}
+homicide_all =
+  homicide %>% 
+  group_by(city_state) %>% 
+  nest()
+OR_plot =
+  homicide_all %>% 
+  mutate(models = map(data, ~glm(resolved ~ victim_age + victim_sex + victim_race, data = .x, family = binomial())),
+    models = map(models, broom::tidy)) %>% 
+  select(-data) %>% 
+  unnest() %>% 
+  filter(term == "victim_racenon-white") %>% 
+  mutate(OR = exp(estimate),
+         lower_bound = exp(estimate - std.error*1.96),
+         upper_bound = exp(estimate + std.error*1.96)) 
+```
 
+```{r}
+OR_plot %>% 
+  mutate(city_state = fct_reorder(city_state, OR)) %>% 
+  ggplot(aes(x = city_state, y = OR)) + 
+  geom_point() + 
+  geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound)) +
+  theme_bw() +
+  theme(legend.position = "bottom",
+        legend.direction = "horizontal",
+        axis.text.x = element_text(angle = 90, size = 8),
+        legend.key.size = unit(0.05, "cm"))
+```
+
+From this plot, we can see that Boston_MA has the lowest OR means that the non-white people's case and the white people's case are the same level difficulty to resolve.Tampa_FL has the highest OR means that non-white people's cases are much in the same solving rate as the white people. There are no much difference. Some cities have large error bar means that the there are much influction in the rate of solving the cases. 
