@@ -39,7 +39,8 @@ Omit city Dallas, TX; Phoenix, AZ; and Kansas City, MO and Tulsa, AL
 ```{r}
 homicide = 
   homicide %>% 
-  filter(!(city_state == "Dallas_TX" | city_state == "Phoenix_AZ" | city_state == "Kansas City_MO" | city_state == "Tulsa_AL"))
+  filter(!(city_state == "Dallas_TX" | city_state == "Phoenix_AZ" | city_state == "Kansas City_MO" | city_state == "Tulsa_AL")) %>% 
+  mutate(victim_race = fct_relevel(ifelse(victim_race == "White", "white", "non-white"), "white"))
 ```
 
 Modifiy victim_race, and make victim_age numeric
@@ -65,14 +66,17 @@ fit_logistic =
   glm(resolved ~ victim_age + victim_race + victim_sex, data = ., family = binomial())
 ```
 
-```{r}
-fit_logistic %>% 
-  broom::tidy()
-```
-
 obtain the estimate and confidence interval of the adjusted odds ratio
 
 ```{r}
-
+fit_logistic %>% 
+  broom::tidy() %>% 
+  mutate(OR = exp(estimate), # transform back
+         lower_bound = exp(estimate - std.error*1.96),
+         upper_bound = exp(estimate + std.error*1.96)) %>%
+  select(term, log_OR = estimate, OR, lower_bound, upper_bound, p.value) %>% 
+  knitr::kable(digits = 3)
 ```
+
+
 
