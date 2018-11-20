@@ -15,6 +15,10 @@ library(tidyverse)
 library(dplyr)
 library(stringr)
 library(readr)
+library(leaps)
+library(modelr)
+library(mgcv)
+library(broom)
 ```
 
 ## Question 1
@@ -111,3 +115,36 @@ OR_plot %>%
 ```
 
 From this plot, we can see that Boston_MA has the lowest OR means that the non-white people's case and the white people's case are the same level difficulty to resolve.Tampa_FL has the highest OR means that non-white people's cases are much in the same solving rate as the white people. There are no much difference. Some cities have large error bar means that the there are much influction in the rate of solving the cases. 
+
+## Question 2 
+
+load and clean data. 
+
+```{r}
+birthweight = read_csv("data/birthweight.csv") %>% 
+  mutate(mrace = as.factor(mrace),
+         frace = as.factor(frace),
+         babysex = as.factor(babysex),
+         malform = as.factor(malform))
+```
+
+In order to find the best fitted model, we need to compare the adjusted R^2. 
+We can use the "lm.regsubsets" function. 
+
+```{r}
+model = regsubsets(bwt ~ ., data = birthweight)
+summary(model)
+```
+
+The '*' means that correlation is significant, so we need to include this variable in the model. 
+
+Make two other models 
+
+```{r}
+lin_model1 = lm(bwt ~ blength + gaweeks, data = birthweight)
+summary(lin_model1)
+
+lin_model2 = lm(bwt ~ bhead + blength + babysex + bhead * blength * babysex, data = birthweight)
+summary(lin_model2)
+```
+
