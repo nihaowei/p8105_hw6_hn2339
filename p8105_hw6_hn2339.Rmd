@@ -136,7 +136,13 @@ model = regsubsets(bwt ~ ., data = birthweight)
 summary(model)
 ```
 
-The '*' means that correlation is significant, so we need to include this variable in the model. 
+The '*' means that correlation is significant, so we need to include this variable in the model. So for the best fitted model, we choose 'bhead', 'blength', 'delwt', 'frace4', 'gaweeks', 'mrace2', 'ppbmi', 'smoken'.
+
+```{r}
+best_fit = lm(bwt ~ bhead + blength + delwt + frace + gaweeks + mrace + ppbmi + smoken,
+               data = birthweight)
+summary(best_fit)
+```
 
 Make two other models 
 
@@ -146,5 +152,11 @@ summary(lin_model1)
 
 lin_model2 = lm(bwt ~ bhead + blength + babysex + bhead * blength * babysex, data = birthweight)
 summary(lin_model2)
+```
+
+The multiple R^2 for the 'best_fit' linear regression is 0.7166, the multiple R^2 for the other two is 0.5769 and 0.6849, so the model we choose is better. 
+
+```{r}
+
 ```
 
