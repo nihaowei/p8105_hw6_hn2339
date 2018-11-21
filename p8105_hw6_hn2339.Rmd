@@ -157,6 +157,9 @@ summary(lin_model2)
 The multiple R^2 for the 'best_fit' linear regression is 0.7166, the multiple R^2 for the other two is 0.5769 and 0.6849, so the model we choose is better. 
 
 ```{r}
-
+birthweight %>% 
+  add_residuals(best_fit) %>% 
+  add_predictions(best_fit) %>% 
+  ggplot(aes(x = pred, y = resid)) + geom_point()
 ```
 
