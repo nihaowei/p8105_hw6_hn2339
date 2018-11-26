@@ -136,11 +136,18 @@ model = regsubsets(bwt ~ ., data = birthweight)
 summary(model)
 ```
 
-The '*' means that correlation is significant, so we need to include this variable in the model. So for the best fitted model, we choose 'bhead', 'blength', 'delwt', 'frace4', 'gaweeks', 'mrace2', 'ppbmi', 'smoken'.
+The '*' means that correlation is significant, so we need to include this variable in the model. So for the best fitted model, we choose 'babysex', 'bhead', 'blength', 'delwt', 'frace4', 'gaweeks', 'mrace2', 'ppbmi', 'smoken'.
 
 ```{r}
-best_fit = lm(bwt ~ bhead + blength + delwt + frace + gaweeks + mrace + ppbmi + smoken,
-               data = birthweight)
+fit_full = lm(bwt~., data = birthweight)
+step(fit_full, direction = "backward")
+```
+
+Use the criterion-based procedures, we choose the model with the smallest AIC value. 
+
+```{r}
+best_fit = lm(bwt ~ babysex + bhead + blength + delwt + fincome + gaweeks + 
+    mheight + mrace + parity + ppwt + smoken, data = birthweight)
 summary(best_fit)
 ```
 
@@ -150,16 +157,43 @@ Make two other models
 lin_model1 = lm(bwt ~ blength + gaweeks, data = birthweight)
 summary(lin_model1)
 
-lin_model2 = lm(bwt ~ bhead + blength + babysex + bhead * blength * babysex, data = birthweight)
+lin_model2 = lm(bwt ~ bhead * blength * babysex, data = birthweight)
 summary(lin_model2)
 ```
 
-The multiple R^2 for the 'best_fit' linear regression is 0.7166, the multiple R^2 for the other two is 0.5769 and 0.6849, so the model we choose is better. 
+The multiple R^2 for the 'best_fit' linear regression is 0.7181, the multiple R^2 for the other two is 0.5769 and 0.6849, so the model we choose is better. 
 
 ```{r}
 birthweight %>% 
   add_residuals(best_fit) %>% 
   add_predictions(best_fit) %>% 
-  ggplot(aes(x = pred, y = resid)) + geom_point()
+  ggplot(aes(x = pred, y = resid)) + geom_point() + ggtitle("residuals vs prediction value ")
+```
+
+Cross validation 
+
+```{r}
+set.seed(1)
+cv_df = crossv_mc(birthweight, 100, test = 0.2) %>% 
+  mutate(train = map(train, as_tibble),
+         test = map(test, as_tibble))
+```
+
+```{r}
+cv_result <- 
+  cv_df %>% 
+  mutate(lin_best = map(train, ~lm(bwt~babysex + bhead + blength + gaweeks + delwt + mheight + mrace + parity + ppwt + smoken + fincome, data = birthweight)),
+         lin_mod2 = map(train, ~lm(bwt ~ blength + gaweeks, data = birthweight)),
+         lin_mod3 = map(train, ~lm(bwt ~ bhead * blength * babysex, data = birthweight))) %>%  
+  mutate(rmse_lin_best = map2_dbl(best_fit, test, ~rmse(model = best_fit, data = birthweight)),
+         rmse_mod2 = map2_dbl(lin_model1, test, ~rmse(model = lin_model1, data = birthweight)),
+         rmse_mod3 = map2_dbl(lin_model2, test, ~rmse(model = lin_model2, data = birthweight))) 
+```
+
+```{r}
+cv_result %>% 
+  dplyr::select(.id, starts_with("rmse")) %>% 
+  gather(key = model, value = rmse, rmse_lin_best:rmse_mod3) %>% 
+  ggplot(aes(x = model, y = rmse)) + geom_violin()
 ```
 
