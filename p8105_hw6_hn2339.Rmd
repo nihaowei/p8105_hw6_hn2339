@@ -173,7 +173,6 @@ birthweight %>%
 Cross validation 
 
 ```{r}
-set.seed(1)
 cv_df = crossv_mc(birthweight, 100, test = 0.2) %>% 
   mutate(train = map(train, as_tibble),
          test = map(test, as_tibble))
