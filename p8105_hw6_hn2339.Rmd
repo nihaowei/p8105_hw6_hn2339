@@ -179,20 +179,25 @@ cv_df = crossv_mc(birthweight, 100, test = 0.2) %>%
 ```
 
 ```{r}
-cv_result <- 
+cv_result = 
   cv_df %>% 
   mutate(lin_best = map(train, ~lm(bwt~babysex + bhead + blength + gaweeks + delwt + mheight + mrace + parity + ppwt + smoken + fincome, data = birthweight)),
          lin_mod2 = map(train, ~lm(bwt ~ blength + gaweeks, data = birthweight)),
-         lin_mod3 = map(train, ~lm(bwt ~ bhead * blength * babysex, data = birthweight))) %>%  
-  mutate(rmse_lin_best = map2_dbl(best_fit, test, ~rmse(model = best_fit, data = birthweight)),
-         rmse_mod2 = map2_dbl(lin_model1, test, ~rmse(model = lin_model1, data = birthweight)),
-         rmse_mod3 = map2_dbl(lin_model2, test, ~rmse(model = lin_model2, data = birthweight))) 
+         lin_mod3 = map(train, ~lm(bwt ~ bhead * blength * babysex, data = birthweight)))
 ```
 
 ```{r}
-cv_result %>% 
-  dplyr::select(.id, starts_with("rmse")) %>% 
-  gather(key = model, value = rmse, rmse_lin_best:rmse_mod3) %>% 
-  ggplot(aes(x = model, y = rmse)) + geom_violin()
+#cv_result = 
+ # cv_df %>%
+ # mutate(rmse_lin_best = map2_dbl(best_fit, test, ~rmse(model = best_fit, data = birthweight)),
+ #        rmse_mod2 = map2_dbl(lin_model1, test, ~rmse(model = lin_model1, data = birthweight)),
+#         rmse_mod3 = map2_dbl(lin_model2, test, ~rmse(model = lin_model2, data = birthweight)))
+```
+
+```{r}
+#cv_result %>% 
+ # dplyr::select(.id, starts_with("rmse")) %>% 
+ # gather(key = model, value = rmse, rmse_lin_best:rmse_mod3) %>% 
+ # ggplot(aes(x = model, y = rmse)) + geom_violin()
 ```
 
